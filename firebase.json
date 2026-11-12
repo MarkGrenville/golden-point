@@ -7,7 +7,19 @@
     {
       "backendId": "golden-point-web",
       "rootDir": "/",
-      "ignore": ["node_modules", ".git", "functions", ".emulator-data"]
+      "ignore": [
+        "node_modules",
+        ".git",
+        "functions",
+        ".emulator-data",
+        ".env*",
+        "firebase-web-config.txt",
+        "firebase-debug.log",
+        "firestore-debug.log",
+        ".nocturnal",
+        ".playwright-mcp",
+        "firebase-export-*"
+      ]
     }
   ],
   "emulators": {

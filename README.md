@@ -112,8 +112,9 @@ Do not carry emulator variables into a deployed build.
    a web app. Create a Firestore database in **europe-west4**, and enable Authentication
    with Google and Email/Password → email-link sign-in. Your Firebase web configuration
    comes from Project settings → Your apps; this repository does not supply a live project.
-2. In `apphosting.yaml`, replace `APP_BASE_URL`, the auth domain, project ID and app ID
-   placeholders with your own values. Use the HTTPS backend URL assigned in step 4;
+2. In `apphosting.yaml`, replace the `APP_BASE_URL`, auth domain, project ID, app ID
+   and Firebase web API key placeholders with your own values. Use the HTTPS backend
+   URL assigned in step 4;
    update it and roll out again once that URL is known. Leave all emulator variables unset
    in App Hosting. Keep `.firebaserc` pointing at the safe demo project for local work.
 3. Sign in to the CLI and deploy the Firestore rules and indexes to your explicitly
@@ -122,25 +123,23 @@ Do not carry emulator variables into a deployed build.
    ```sh
    firebase login
    firebase deploy --only firestore:rules,firestore:indexes --project YOUR_PROJECT_ID
-   firebase apphosting:secrets:set firebase-web-api-key --project YOUR_PROJECT_ID
    firebase apphosting:secrets:set gp-keys-secret --project YOUR_PROJECT_ID
    ```
 
-   Enter your web app's Firebase API key at the first secret prompt. At the second,
-   enter a securely generated **32-byte key encoded as 64 hex characters**. Store a
+   Enter a securely generated **32-byte key encoded as 64 hex characters**. Store a
    secure backup: existing encrypted PayFast credentials need that same key to decrypt.
    Never commit it or expose it in a `NEXT_PUBLIC_` variable.
 4. Put your copy in your own GitHub repository. In Firebase console → App Hosting,
    create a backend, choose **europe-west4**, connect that repository, select the live
    branch and use `/` as the app root. Use `golden-point-web` as the backend ID to match
    `firebase.json`, or update that ID to your choice. Grant the backend access to the
-   two secrets, using the console or CLI:
+   encryption secret, using the console or CLI:
 
    ```sh
-   firebase apphosting:secrets:grantaccess firebase-web-api-key,gp-keys-secret --backend golden-point-web --project YOUR_PROJECT_ID
+   firebase apphosting:secrets:grantaccess gp-keys-secret --backend golden-point-web --project YOUR_PROJECT_ID
    ```
 
-   Start a rollout after configuring the secrets and `apphosting.yaml`. Future pushes
+   Start a rollout after configuring the secret and `apphosting.yaml`. Future pushes
    to your selected live branch can trigger automatic rollouts. This is Firebase
    **App Hosting** for Next.js; deploying Firestore alone does not deploy the web app.
 5. Add your hosted domain (and any custom domain) to Authentication → Settings →

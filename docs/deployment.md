@@ -21,3 +21,21 @@ Before release, run unit tests, typecheck, emulator integration tests and the pr
 Never deploy or seed against the live project during local development.
 
 Guest tournaments publish public scoreboards through `/api/scoreboards/<id>`, without Firebase sign-in. A random publishing token is stored on the organiser’s device; only its SHA-256 hash is kept in the server-only `guestScoreboards` collection. The spectator URL contains no token. Payloads are limited to public scoreboard fields, and stale revisions cannot replace newer scores. Existing Firestore rules allow anonymous scoreboard reads and deny client access to publishing-token hashes.
+
+## Deployment configuration and verification
+
+Keep `.firebaserc` pointing at the demo project for local work. Always name your own production project explicitly in deploy commands. The Firebase web API key is public client configuration and belongs in the `NEXT_PUBLIC_FIREBASE_API_KEY` placeholder in `apphosting.yaml`. PayFast credentials and `GP_KEYS_SECRET` must remain private; bind `gp-keys-secret` through Secret Manager for RUNTIME only, and never replace it during a routine rollout.
+
+Create the App Hosting backend and the Standard Firestore database in `europe-west4`. Authorise the backend hostname under Firebase Authentication settings. Enable email-link sign-in and Google sign-in in the Firebase console, selecting a support email for Google. Configure `APP_BASE_URL` with the assigned HTTPS backend origin so payment return and ITN URLs point to the deployed app.
+
+Grant the App Hosting runtime service account `roles/datastore.user`, plus access to `gp-keys-secret`. Never upload a service-account credential file. Source uploads exclude environment files, emulator data, logs, local tooling and Firebase web-config exports.
+
+After creating the backend (using `golden-point-web` to match `firebase.json`), deploy local source with:
+
+```sh
+firebase deploy --only firestore,apphosting --project YOUR_PROJECT_ID --non-interactive
+```
+
+A completed source upload is not a completed rollout: wait for App Hosting to report success. Confirm that all six composite indexes are READY and the `rateLimits.expiresAt` TTL policy is ACTIVE. Check the homepage, sign-in and tournament creation pages; a missing group should return 404 through the server Firestore path. Anonymous client reads of merchant data must return 403, and a request to the signed-in API without credentials must return 401.
+
+On a phone, verify a Mexicano, the footer, a guest cash registration with fictional data, and cancellation. Exercise Google and email-link sign-in end to end before calling those flows verified. Keep real player records and operational rollout logs out of this repository.
