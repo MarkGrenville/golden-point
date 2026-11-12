@@ -29,6 +29,7 @@ export default function RootLayout({
             <Link href="/" className="brand-lockup"><span className="brand-ball" aria-hidden="true" />Golden Point<span className="brand-period">.</span></Link>
             <nav>
               <Link href="/tournament/new">Americano / Mexicano</Link>
+              <Link href="/match">Match us up</Link>
               <Link href="/me">My bookings</Link>
               <Link href="/admin">Organise</Link>
             </nav>

@@ -23,6 +23,10 @@ The sign-in offer is small and dismissible; it never blocks play.
   by hand. Merchant credentials are encrypted on the server with AES-256-GCM.
 - **Settlements:** paid withdrawals and cancellations show money to settle with the
   organiser. Resolve it in person, then tick settled. The app never moves money back.
+- **Social rounds:** open `/match`, enter 4–32 names and choose random or balanced pairs.
+  For balanced games, list players from strongest to newest: nearby levels share a court,
+  stronger and weaker partners mix. Choose your courts, shuffle again, and see who sits out.
+  Rests are drawn at random on each shuffle; names and the draw stay on your device.
 - **On court:** Americano, Mexicano, local sessions and shared live scoreboards.
   Waiting-list offers and holds expire when pages or payments are read; no scheduler is needed.
 

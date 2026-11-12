@@ -355,3 +355,6 @@ button:not(.secondary):not(.danger), .button:not(.secondary) { background: var(-
 .tournament-board .tabs button { background: transparent; border-color: transparent; border-bottom: 3px solid transparent; color: var(--muted); }
 .tournament-board .tabs button[aria-selected="true"] { color: var(--court); border-bottom-color: var(--brand); }
 @media (max-width: 600px) { .date-stats strong { font-size: clamp(18px, 6vw, 27px); } }
+
+.social-draw .teams > div { display: flex; flex-direction: column; overflow-wrap: anywhere; min-width: 0; }
+.social-draw .teams { font-size: clamp(1.25rem, 4vw, 1.8rem); }

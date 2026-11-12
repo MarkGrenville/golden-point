@@ -9,6 +9,7 @@ export default function Home() {
           <h1>Your people.<br />Your court.<br /><span>Game on.</span></h1>
           <p>Your weekly padel group: who’s playing, who’s paid and who’s waiting. Run Americano or Mexicano on the night.</p>
           <Link className="button ball-button" href="/tournament/new">Create Americano / Mexicano <span aria-hidden="true">↗</span></Link>
+          <Link className="home-text-link" href="/match">Just a social round? Match us up ↗</Link>
           <p className="home-note">Free to play. No account needed.</p>
         </div>
         <div className="court-art" aria-hidden="true"><div className="court-drawing"><span className="court-service" /><span className="court-net" /><span className="court-ball" /></div><span className="court-caption">A good week starts on court.</span></div>
