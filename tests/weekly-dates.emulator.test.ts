@@ -1,0 +1,47 @@
+import { beforeEach, expect, it } from "vitest";
+import { createWeeklyDate, guestDateCaller } from "@/server/weekly-dates";
+import { adminDb } from "@/server/admin";
+import { POST as adminPost } from "@/app/api/admin/route";
+import { createHold, withdraw } from "@/server/booking";
+import { publicEvent } from "@/server/public";
+import { clearFirestore } from "./helpers";
+
+const input = { title: "Demo Weekly", organiserName: "Demo Organiser", venue: "Demo Courts", date: "2099-11-12", startTime: "18:00", endTime: "19:30", playerLimit: 4, priceCents: 15000 };
+const rpc = async (body: object) => adminPost(new Request("http://localhost/api/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }));
+beforeEach(clearFirestore);
+it("creates a guest date and scopes its private link to payments and settlements for that date", async () => {
+  const date = await createWeeklyDate(input, null);
+  const guestToken = date.manageUrl.split("#")[1]!;
+  const caller = await guestDateCaller(date.id, guestToken);
+  const publicData = await publicEvent(date.id);
+  expect(publicData).toMatchObject({ status: "scheduled", organiserName: "Demo Organiser", payfastConnected: false });
+  expect(JSON.stringify(publicData)).not.toContain(guestToken);
+  const owner = (await adminDb().doc(`guestDates/${date.id}`).get()).data()!;
+  expect(owner.tokenHash).not.toBe(guestToken);
+  const player = await createHold(date.id, { poolId: "pool1", displayName: "Demo Player" }, null);
+  expect((await rpc({ op: "event.dashboard", eventId: date.id })).status).toBe(401);
+  expect((await rpc({ op: "registration.manualPayment", registrationId: player.registrationId, guestToken: "a".repeat(64), payment: { method: "cash", amountCents: 15000 } })).status).toBe(403);
+  const paid = await rpc({ op: "registration.manualPayment", registrationId: player.registrationId, guestToken, payment: { method: "cash", amountCents: 15000 } });
+  expect(paid.status).toBe(200);
+  expect((await publicEvent(date.id))?.pools[0]?.roster).toEqual([{ name: "Demo Player", paid: true }]);
+  await withdraw(player.registrationId, null, new Date(), player.bookingToken);
+  const dashboard = await rpc({ op: "event.dashboard", eventId: date.id, guestToken });
+  expect(await dashboard.json()).toMatchObject({ registrations: [{ settlement: "due", settlementCents: 15000 }] });
+  expect((await rpc({ op: "registration.settle", registrationId: player.registrationId, guestToken })).status).toBe(200);
+  expect((await adminDb().doc(`registrations/${player.registrationId}`).get()).data()?.settlement).toBe("settled");
+  const other = await createWeeklyDate(input, null);
+  expect((await rpc({ op: "event.dashboard", eventId: other.id, guestToken })).status).toBe(403);
+  expect((await rpc({ op: "workspace.overview", workspaceId: owner.workspaceId, guestToken })).status).toBe(403);
+  expect((await rpc({ op: "event.update", eventId: date.id, guestToken, patch: { priceCents: 1 } })).status).toBe(403);
+  expect((await rpc({ op: "event.cancel", eventId: date.id, guestToken, reason: "Called off" })).status).toBe(200);
+  expect(caller.uid).toBe(owner.uid);
+});
+it("uses the signed-in organiser's connected workspace, and requires membership", async () => {
+  const date = await createWeeklyDate(input, { uid: "demo-owner", emailVerified: true });
+  const event = (await adminDb().doc(`events/${date.id}`).get()).data()!;
+  await adminDb().doc(`workspaces/${event.workspaceId}`).update({ merchant: { status: "verified", sandbox: true } });
+  const next = await createWeeklyDate({ ...input, workspaceId: event.workspaceId }, { uid: "demo-owner", emailVerified: true });
+  expect((await publicEvent(next.id))?.payfastConnected).toBe(true);
+  expect(next.manageUrl).not.toContain("#");
+  await expect(createWeeklyDate({ ...input, workspaceId: event.workspaceId }, null)).rejects.toThrow();
+});

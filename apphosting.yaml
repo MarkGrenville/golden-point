@@ -1,0 +1,28 @@
+# Firebase App Hosting (requires the Blaze plan). Conservative limits; set budget alerts too —
+# alerts are not a spending cap.
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: APP_BASE_URL
+    value: https://REPLACE-WITH-BACKEND-URL
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    secret: firebase-web-api-key
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: REPLACE.firebaseapp.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: REPLACE
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: REPLACE
+    availability: [BUILD, RUNTIME]
+  - variable: GP_KEYS_SECRET
+    secret: gp-keys-secret
+    availability: [RUNTIME]

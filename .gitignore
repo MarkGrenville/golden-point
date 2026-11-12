@@ -1,0 +1,22 @@
+node_modules/
+.next/
+out/
+.emulator-data/
+*.log
+.env*.local
+.firebase/
+next-env.d.ts
+*.tsbuildinfo
+firebase-export-*/
+.playwright-mcp/
+
+# Local configuration, private exports and machine tooling
+.env
+.env.*
+!.env.example
+CLAUDE.md
+.nocturnal/
+*.log.*
+logs/
+firebase-web-config.txt
+.DS_Store
